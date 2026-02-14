@@ -1,57 +1,18 @@
-import { Search, Bell, User, Activity, Pill, Settings, LogOut, HelpCircle, DollarSign, Package2 } from 'lucide-react';
+import { Search, Bell, User, Activity, Settings, LogOut, HelpCircle, DollarSign, Package2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { toast } from 'sonner';
 import type { TabType } from '../App';
+import { mockNotifications } from '../data/notifications';
+
+export type AppPage = 'profile' | 'settings' | 'help' | 'notifications';
 
 type HeaderProps = {
   currentTab: TabType;
   onTabChange: (tab: TabType) => void;
+  onNavigateToPage?: (page: AppPage) => void;
 };
 
-type Notification = {
-  id: string;
-  type: 'alert' | 'info' | 'success';
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-};
-
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'alert',
-    title: 'Low Stock Alert',
-    message: 'Metformin stock below minimum threshold',
-    time: '5 mins ago',
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'info',
-    title: 'New Order Received',
-    message: 'Order #10240 requires prescription verification',
-    time: '12 mins ago',
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'success',
-    title: 'Dispatch Complete',
-    message: 'Order #10232 delivered successfully',
-    time: '1 hour ago',
-    read: true,
-  },
-  {
-    id: '4',
-    type: 'alert',
-    title: 'Machine Error',
-    message: 'Machine 3 requires maintenance check',
-    time: '2 hours ago',
-    read: true,
-  },
-];
-
-export function Header({ currentTab, onTabChange }: HeaderProps) {
+export function Header({ currentTab, onTabChange, onNavigateToPage }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -86,8 +47,8 @@ export function Header({ currentTab, onTabChange }: HeaderProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Pill className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="DOZ3" className="w-8 h-8 object-contain" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">DOZ3 Pharmacy Operations</h1>
@@ -185,7 +146,13 @@ export function Header({ currentTab, onTabChange }: HeaderProps) {
                     ))}
                   </div>
                   <div className="border-t border-gray-200 px-4 py-2 bg-gray-50">
-                    <button className="text-xs font-semibold text-blue-600 hover:text-blue-700">
+                    <button
+                      onClick={() => {
+                        setShowNotifications(false);
+                        onNavigateToPage?.('notifications');
+                      }}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+                    >
                       View all notifications
                     </button>
                   </div>
@@ -222,20 +189,32 @@ export function Header({ currentTab, onTabChange }: HeaderProps) {
                     </div>
                   </div>
                   <div className="p-2">
-                    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                    <button
+                      onClick={() => { setShowProfile(false); onNavigateToPage?.('profile'); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    >
                       <User className="w-4 h-4 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">My Profile</span>
                     </button>
-                    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                    <button
+                      onClick={() => { setShowProfile(false); onNavigateToPage?.('settings'); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    >
                       <Settings className="w-4 h-4 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">Settings</span>
                     </button>
-                    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                    <button
+                      onClick={() => { setShowProfile(false); onNavigateToPage?.('help'); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    >
                       <HelpCircle className="w-4 h-4 text-gray-600" />
                       <span className="text-sm font-medium text-gray-700">Help & Support</span>
                     </button>
                     <div className="border-t border-gray-200 my-2"></div>
-                    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors text-left">
+                    <button
+                      onClick={() => { setShowProfile(false); toast.success('Logged out'); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-50 transition-colors text-left"
+                    >
                       <LogOut className="w-4 h-4 text-red-600" />
                       <span className="text-sm font-medium text-red-600">Log Out</span>
                     </button>

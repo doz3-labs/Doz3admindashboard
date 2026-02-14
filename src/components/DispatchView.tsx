@@ -1,5 +1,6 @@
 import { ArrowLeft, MapPin, Clock, IndianRupee, Bike, Truck, Building2, Package, Phone, User, Star, Navigation, Route, AlertCircle, CheckCircle2, Copy, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import type { Order } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -89,7 +90,8 @@ export function DispatchView({ order, onBack }: DispatchViewProps) {
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
   
   const handleBooking = (aggregatorName: string, price: number) => {
-    alert(`✓ Booking confirmed!\n\nCourier: ${aggregatorName}\nFee: ₹${price}\nOrder: ${order.orderNumber}\n\nRider will arrive at pickup location in ${aggregators.find(a => a.name === aggregatorName)?.eta}`);
+    const eta = aggregators.find(a => a.name === aggregatorName)?.eta ?? '';
+    toast.success(`Booking confirmed! Courier: ${aggregatorName}, Fee: ₹${price}. Rider ETA: ${eta}`);
     onBack();
   };
 
@@ -289,7 +291,10 @@ export function DispatchView({ order, onBack }: DispatchViewProps) {
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Phone className="w-3.5 h-3.5" />
                       {order.customerPhone}
-                      <button className="ml-auto p-1 hover:bg-blue-100 rounded transition-colors">
+                      <button
+                        onClick={() => toast.success('Phone number copied')}
+                        className="ml-auto p-1 hover:bg-blue-100 rounded transition-colors"
+                      >
                         <Copy className="w-3.5 h-3.5 text-blue-600" />
                       </button>
                     </div>
@@ -302,7 +307,10 @@ export function DispatchView({ order, onBack }: DispatchViewProps) {
                     Delivery Address
                   </div>
                   <div className="text-sm text-gray-900 font-medium">{deliveryAddress}</div>
-                  <button className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1">
+                  <button
+                    onClick={() => toast.success('Address copied')}
+                    className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1"
+                  >
                     <Copy className="w-3 h-3" />
                     Copy Address
                   </button>

@@ -3,6 +3,7 @@ import { StockOverview } from './StockOverview';
 import { OrdersWorkflow } from './OrdersWorkflow';
 import { QuickStats } from './QuickStats';
 import type { Order, TabType } from '../App';
+import type { AppPage } from './Header';
 
 type MasterDashboardProps = {
   onVerifyPrescription: (order: Order) => void;
@@ -10,12 +11,13 @@ type MasterDashboardProps = {
   onDispatch: (order: Order) => void;
   currentTab: TabType;
   onTabChange: (tab: TabType) => void;
+  onNavigateToPage?: (page: AppPage) => void;
 };
 
-export function MasterDashboard({ onVerifyPrescription, onReviewQC, onDispatch, currentTab, onTabChange }: MasterDashboardProps) {
+export function MasterDashboard({ onVerifyPrescription, onReviewQC, onDispatch, currentTab, onTabChange, onNavigateToPage }: MasterDashboardProps) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header currentTab={currentTab} onTabChange={onTabChange} />
+      <Header currentTab={currentTab} onTabChange={onTabChange} onNavigateToPage={onNavigateToPage} />
 
       {/* Main Dashboard Content */}
       <div className="px-6 py-6 space-y-6">

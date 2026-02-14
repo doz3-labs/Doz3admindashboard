@@ -1,9 +1,15 @@
 import { useState } from 'react';
+import { Toaster, toast } from 'sonner';
 import { MasterDashboard } from './components/MasterDashboard';
 import { FinancialDashboard } from './components/FinancialDashboard';
 import { PrescriptionReview } from './components/PrescriptionReview';
 import { QCPhotoReview } from './components/QCPhotoReview';
 import { DispatchView } from './components/DispatchView';
+import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
+import { HelpPage } from './pages/HelpPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import type { AppPage } from './components/Header';
 
 export type Medication = {
   id: string;
@@ -49,8 +55,17 @@ export type TabType = 'operations' | 'finance';
 
 function App() {
   const [currentTab, setCurrentTab] = useState<TabType>('operations');
-  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'prescription' | 'qc' | 'dispatch'>('dashboard');
+  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'prescription' | 'qc' | 'dispatch' | AppPage>('dashboard');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const handleNavigateToPage = (page: AppPage) => {
+    setCurrentScreen(page);
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentScreen('dashboard');
+    setSelectedOrder(null);
+  };
 
   const handleVerifyPrescription = (order: Order) => {
     setSelectedOrder(order);
@@ -67,18 +82,13 @@ function App() {
     setCurrentScreen('dispatch');
   };
 
-  const handleBackToDashboard = () => {
-    setCurrentScreen('dashboard');
-    setSelectedOrder(null);
-  };
-
   const handleApprovePrescription = () => {
-    alert('Prescription approved and sent to packaging');
+    toast.success('Prescription approved and sent to packaging');
     handleBackToDashboard();
   };
 
   const handleApproveQC = () => {
-    alert('QC approved - Package ready for dispatch');
+    toast.success('QC approved — Package ready for dispatch');
     handleBackToDashboard();
   };
 
@@ -90,6 +100,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toaster position="top-right" richColors closeButton />
       {currentTab === 'operations' && currentScreen === 'dashboard' && (
         <MasterDashboard 
           onVerifyPrescription={handleVerifyPrescription}
@@ -97,12 +108,14 @@ function App() {
           onDispatch={handleDispatch}
           currentTab={currentTab}
           onTabChange={handleTabChange}
+          onNavigateToPage={handleNavigateToPage}
         />
       )}
       {currentTab === 'finance' && currentScreen === 'dashboard' && (
         <FinancialDashboard 
           currentTab={currentTab}
           onTabChange={handleTabChange}
+          onNavigateToPage={handleNavigateToPage}
         />
       )}
       {currentScreen === 'prescription' && selectedOrder && (
@@ -125,6 +138,10 @@ function App() {
           onBack={handleBackToDashboard}
         />
       )}
+      {currentScreen === 'profile' && <ProfilePage onBack={handleBackToDashboard} />}
+      {currentScreen === 'settings' && <SettingsPage onBack={handleBackToDashboard} />}
+      {currentScreen === 'help' && <HelpPage onBack={handleBackToDashboard} />}
+      {currentScreen === 'notifications' && <NotificationsPage onBack={handleBackToDashboard} />}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { ArrowLeft, User, Phone, Calendar, FileText, CheckCircle2, XCircle, AlertCircle, Pill, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Order } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -13,12 +14,12 @@ type PrescriptionReviewProps = {
 
 export function PrescriptionReview({ order, onBack, onApprove }: PrescriptionReviewProps) {
   const handleReject = () => {
-    alert('Prescription rejected. Customer will be notified.');
+    toast.error('Prescription rejected. Customer will be notified.');
     onBack();
   };
 
   const handleRequestClarification = () => {
-    alert('Clarification request sent to customer');
+    toast.info('Clarification request sent to customer');
   };
 
   return (

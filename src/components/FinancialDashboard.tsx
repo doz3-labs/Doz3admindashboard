@@ -1,10 +1,14 @@
 import { Header } from './Header';
 import { TrendingUp, TrendingDown, IndianRupee, CreditCard, Wallet, ArrowUpRight, ArrowDownRight, Calendar, Download } from 'lucide-react';
+import { toast } from 'sonner';
+import { jsPDF } from 'jspdf';
 import type { TabType } from '../App';
+import type { AppPage } from './Header';
 
 type FinancialDashboardProps = {
   currentTab: TabType;
   onTabChange: (tab: TabType) => void;
+  onNavigateToPage?: (page: AppPage) => void;
 };
 
 type Transaction = {
@@ -71,15 +75,90 @@ const mockTransactions: Transaction[] = [
   },
 ];
 
-export function FinancialDashboard({ currentTab, onTabChange }: FinancialDashboardProps) {
+const revenueByDay = [
+  { day: 'Mon', amount: 5200 },
+  { day: 'Tue', amount: 6800 },
+  { day: 'Wed', amount: 7400 },
+  { day: 'Thu', amount: 8100 },
+  { day: 'Fri', amount: 9200 },
+  { day: 'Sat', amount: 6900 },
+  { day: 'Sun', amount: 1660 },
+];
+
+export function FinancialDashboard({ currentTab, onTabChange, onNavigateToPage }: FinancialDashboardProps) {
   const todayRevenue = 1660;
   const monthlyRevenue = 45280;
   const pendingPayments = 320;
   const expenses = 28400;
 
+  const handleExportPdf = () => {
+    const doc = new jsPDF();
+    const pageW = doc.internal.pageSize.getWidth();
+    let y = 20;
+
+    doc.setFontSize(18);
+    doc.text('DOZ3 Finance Report', pageW / 2, y, { align: 'center' });
+    y += 10;
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generated on ${new Date().toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' })}`, pageW / 2, y, { align: 'center' });
+    y += 16;
+    doc.setTextColor(0, 0, 0);
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('Summary', 14, y);
+    y += 8;
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    doc.text(`Today's Revenue:     Rs ${todayRevenue.toLocaleString()}`, 14, y); y += 6;
+    doc.text(`Monthly Revenue:     Rs ${monthlyRevenue.toLocaleString()}`, 14, y); y += 6;
+    doc.text(`Pending Payments:   Rs ${pendingPayments.toLocaleString()}`, 14, y); y += 6;
+    doc.text(`Monthly Expenses:   Rs ${expenses.toLocaleString()}`, 14, y); y += 14;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Revenue (Last 7 days)', 14, y); y += 6;
+    doc.setFont(undefined, 'normal');
+    revenueByDay.forEach((d) => {
+      doc.text(`${d.day}: Rs ${d.amount.toLocaleString()}`, 14, y); y += 5;
+    });
+    y += 8;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Payment methods', 14, y); y += 6;
+    doc.setFont(undefined, 'normal');
+    doc.text('UPI: 52% (Rs 23,546 this month)', 14, y); y += 5;
+    doc.text('Card: 31% (Rs 14,037 this month)', 14, y); y += 5;
+    doc.text('COD: 17% (Rs 7,697 this month)', 14, y); y += 14;
+
+    doc.setFont(undefined, 'bold');
+    doc.text('Recent Transactions', 14, y); y += 6;
+    doc.setFont(undefined, 'normal');
+    const colW = [22, 45, 28, 35, 28, 38];
+    const headers = ['Order', 'Customer', 'Amount', 'Method', 'Status', 'Date'];
+    headers.forEach((h, i) => {
+      doc.setFont(undefined, 'bold');
+      doc.text(h, 14 + colW.slice(0, i).reduce((a, b) => a + b, 0), y);
+    });
+    doc.setFont(undefined, 'normal');
+    y += 6;
+    mockTransactions.forEach((t) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      const amountStr = (t.type === 'income' ? '+' : '-') + 'Rs ' + t.amount.toLocaleString();
+      const row = [t.orderNumber, t.customerName.slice(0, 18), amountStr, t.paymentMethod, t.status, t.date.slice(0, 16)];
+      row.forEach((cell, i) => {
+        doc.text(cell, 14 + colW.slice(0, i).reduce((a, b) => a + b, 0), y);
+      });
+      y += 6;
+    });
+
+    doc.save(`DOZ3-Finance-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('Report exported as PDF');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header currentTab={currentTab} onTabChange={onTabChange} />
+      <Header currentTab={currentTab} onTabChange={onTabChange} onNavigateToPage={onNavigateToPage} />
 
       {/* Main Dashboard Content */}
       <div className="px-6 py-6 space-y-6">
@@ -143,7 +222,10 @@ export function FinancialDashboard({ currentTab, onTabChange }: FinancialDashboa
                 <h2 className="text-lg font-bold text-gray-900">Revenue Overview</h2>
                 <p className="text-sm text-gray-500">Last 7 days performance</p>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold">
+              <button
+                onClick={handleExportPdf}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold"
+              >
                 <Download className="w-4 h-4" />
                 Export Report
               </button>
@@ -151,15 +233,7 @@ export function FinancialDashboard({ currentTab, onTabChange }: FinancialDashboa
 
             {/* Simple Bar Chart */}
             <div className="space-y-4">
-              {[
-                { day: 'Mon', amount: 5200 },
-                { day: 'Tue', amount: 6800 },
-                { day: 'Wed', amount: 7400 },
-                { day: 'Thu', amount: 8100 },
-                { day: 'Fri', amount: 9200 },
-                { day: 'Sat', amount: 6900 },
-                { day: 'Sun', amount: 1660 },
-              ].map((data, idx) => (
+              {revenueByDay.map((data, idx) => (
                 <div key={idx} className="flex items-center gap-4">
                   <div className="w-12 text-sm font-medium text-gray-600">{data.day}</div>
                   <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">

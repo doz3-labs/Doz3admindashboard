@@ -1,4 +1,5 @@
 import { ArrowLeft, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Order } from '../App';
 
 type QCPhotoReviewProps = {
@@ -11,7 +12,7 @@ export function QCPhotoReview({ order, onBack, onApprove }: QCPhotoReviewProps) 
   const handleReject = () => {
     const reason = prompt('Enter rejection reason:');
     if (reason) {
-      alert(`Package rejected: ${reason}\nSent back for repackaging.`);
+      toast.error(`Package rejected: ${reason}. Sent back for repackaging.`);
       onBack();
     }
   };
