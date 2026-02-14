@@ -189,7 +189,7 @@ export function StockOverview() {
               style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
             />
             <div
-              className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl ring-1 ring-black/5"
+              className="w-[min(100%-2rem,22rem)] max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl ring-1 ring-black/5"
               style={{
                 position: 'fixed',
                 top: '50%',
