@@ -4,7 +4,11 @@ import type { Order } from '../App';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 // Placeholder for prescription image (Figma asset not in repo)
-const prescriptionImg = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBmaWxsPSIjZjNmNGY2Ij48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzliYTBhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UHJlc2NyaXB0aW9uIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+const prescriptionImg =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBmaWxsPSIjZjNmNGY2Ij48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzliYTBhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UHJlc2NyaXB0aW9uIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+
+// PDF stored in public/ for Rajesh's order
+const prescriptionPdfUrl = `${import.meta.env.BASE_URL}prescription.pdf`;
 
 type PrescriptionReviewProps = {
   order: Order;
@@ -65,11 +69,31 @@ export function PrescriptionReview({ order, onBack, onApprove }: PrescriptionRev
               </div>
 
               <div className="bg-gray-100 border-2 border-gray-300 rounded-lg overflow-hidden mb-4">
-                <ImageWithFallback
-                  src={prescriptionImg}
-                  alt="Prescription"
-                  className="w-full h-[500px] object-contain"
-                />
+                {order.customerName === 'Rajesh Kumar' ? (
+                  <div className="flex flex-col">
+                    <iframe
+                      src={prescriptionPdfUrl}
+                      title="Prescription PDF"
+                      className="w-full h-[500px] border-0"
+                    />
+                    <div className="px-4 py-2 bg-gray-900/5 text-xs text-gray-600 text-right">
+                      <a
+                        href={prescriptionPdfUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:text-blue-700 underline"
+                      >
+                        Open full prescription
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <ImageWithFallback
+                    src={prescriptionImg}
+                    alt="Prescription"
+                    className="w-full h-[500px] object-contain"
+                  />
+                )}
               </div>
 
               <div className="space-y-3">
