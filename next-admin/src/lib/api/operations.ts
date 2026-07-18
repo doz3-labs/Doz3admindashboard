@@ -86,6 +86,24 @@ export async function approveOrderForPrinting(
   );
 }
 
+export type QrScanResult = {
+  order_id: string;
+  status: string;
+};
+
+/**
+ * Packaging QC: the scan that moves an order from ApprovedForPrinting to
+ * PackagingQCCompleted. The backend records a PackagingQCScan row, so this is
+ * the auditable checkpoint between printing a roll and dispatching it.
+ */
+export async function qrScanOrder(orderId: string, qrPayload: string): Promise<QrScanResult> {
+  return postJson<QrScanResult>(
+    `/packaging/orders/${encodeURIComponent(orderId)}/qr-scan`,
+    { qr_payload: qrPayload },
+    "POST /packaging/orders/{order_id}/qr-scan",
+  );
+}
+
 export type AdminOrderSummary = {
   order_id: string;
   patient_id: string;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Users, Layers } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Layers, ScanLine } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ const navItems = [
   { href: "/sorting-queue", label: "Sorting Queue", icon: Layers },
   { href: "/dashboard/inventory", label: "Inventory", icon: Layers },
   { href: "/dashboard/fulfillment", label: "Fulfillment", icon: Layers },
+  { href: "/qc", label: "Packaging QC", icon: ScanLine },
 ] as const;
 
 export function AppSidebar() {
