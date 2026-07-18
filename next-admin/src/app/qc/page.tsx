@@ -64,12 +64,17 @@ export default function QcPage() {
     } catch (e) {
       // A 403 here means a valid token without the right role — surfaced as-is
       // rather than treated as a scan failure.
+      // A 409 means the scanned label belongs to a different roll — the case
+      // this check exists to catch, so it is surfaced as a mismatch rather than
+      // a generic failure.
       const message =
         e instanceof ApiError && e.status === 403
           ? "Not authorized to record a QC scan. Pharmacist or admin role required."
-          : e instanceof Error
-            ? e.message
-            : "Scan failed";
+          : e instanceof ApiError && e.status === 409
+            ? "That label is not for this order. Check you have the right roll."
+            : e instanceof Error
+              ? e.message
+              : "Scan failed";
       setOutcome((prev) => ({ ...prev, [orderId]: { kind: "error", message } }));
     } finally {
       setSubmitting(false);
@@ -163,7 +168,7 @@ export default function QcPage() {
                         autoFocus
                         value={qrPayload}
                         onChange={(e) => setQrPayload(e.target.value)}
-                        placeholder="Scan or type the roll QR code"
+                        placeholder={`Scan the roll label (must contain ${o.order_id.slice(0, 8)}…)`}
                         className="min-w-[16rem] flex-1 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-900"
                       />
                       <button
