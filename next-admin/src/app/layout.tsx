@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AuthGate } from "@/components/auth-gate";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +37,9 @@ export default function RootLayout({
         <div className="flex min-h-screen">
           <AppSidebar />
           <div className="flex-1">
-            <div className="h-14 border-b border-zinc-200 bg-white px-4 flex items-center justify-between dark:border-zinc-900 dark:bg-zinc-950">
-              <div className="text-sm font-semibold">Dashboard</div>
-              <div className="text-xs text-zinc-500 dark:text-zinc-400">Signed in as Pharmacist</div>
-            </div>
-            <main className="p-4 md:p-6">{children}</main>
+            {/* Renders the sign-in form until a real pharmacist token exists;
+                the header now shows the actual signed-in user, not a label. */}
+            <AuthGate>{children}</AuthGate>
           </div>
         </div>
       </body>

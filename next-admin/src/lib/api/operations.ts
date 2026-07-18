@@ -1,3 +1,5 @@
+import { getJson, postJson } from "./client";
+
 export type InventoryBatch = {
   id: string;
   medication_id: string;
@@ -44,61 +46,44 @@ export type PendingPharmacistOrderSummary = {
   lines: FulfillmentLine[];
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:8000";
-
-async function assertOk(res: Response, label: string) {
-  if (res.ok) return;
-  const text = await res.text().catch(() => "");
-  throw new Error(`${label} failed (${res.status}): ${text || res.statusText}`);
-}
-
 export async function getInventoryBatches(): Promise<InventoryBatch[]> {
-  const res = await fetch(`${API_BASE_URL}/inventory/batches`, { cache: "no-store" });
-  await assertOk(res, "GET /inventory/batches");
-  return (await res.json()) as InventoryBatch[];
+  return getJson<InventoryBatch[]>("/inventory/batches", "GET /inventory/batches");
 }
 
 export async function getFulfillmentQueue(): Promise<FulfillmentQueueItem[]> {
-  const res = await fetch(`${API_BASE_URL}/fulfillment/queue`, { cache: "no-store" });
-  await assertOk(res, "GET /fulfillment/queue");
-  return (await res.json()) as FulfillmentQueueItem[];
+  return getJson<FulfillmentQueueItem[]>("/fulfillment/queue", "GET /fulfillment/queue");
 }
 
 export async function getFulfillmentDetails(patientId: string): Promise<FulfillmentDetail> {
-  const res = await fetch(`${API_BASE_URL}/fulfillment/${encodeURIComponent(patientId)}/details`, {
-    cache: "no-store",
-  });
-  await assertOk(res, "GET /fulfillment/{patient_id}/details");
-  return (await res.json()) as FulfillmentDetail;
+  return getJson<FulfillmentDetail>(
+    `/fulfillment/${encodeURIComponent(patientId)}/details`,
+    "GET /fulfillment/{patient_id}/details"
+  );
 }
 
 export async function approveForPrinting(patientId: string, windowStart: string, windowEnd: string) {
-  const res = await fetch(
-    `${API_BASE_URL}/fulfillment/${encodeURIComponent(patientId)}/approve-for-printing`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ window_start: windowStart, window_end: windowEnd }),
-    }
+  return postJson<{ pouch_roll_id: string; status: string }>(
+    `/fulfillment/${encodeURIComponent(patientId)}/approve-for-printing`,
+    { window_start: windowStart, window_end: windowEnd },
+    "POST /fulfillment/{patient_id}/approve-for-printing"
   );
-  await assertOk(res, "POST /fulfillment/{patient_id}/approve-for-printing");
-  return (await res.json()) as { pouch_roll_id: string; status: string };
 }
 
 export async function getPendingPharmacistOrders(): Promise<PendingPharmacistOrderSummary[]> {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/pending-pharmacist`, { cache: "no-store" });
-  await assertOk(res, "GET /admin/orders/pending-pharmacist");
-  return (await res.json()) as PendingPharmacistOrderSummary[];
+  return getJson<PendingPharmacistOrderSummary[]>(
+    "/admin/orders/pending-pharmacist",
+    "GET /admin/orders/pending-pharmacist"
+  );
 }
 
-export async function approveOrderForPrinting(orderId: string): Promise<{ order_id: string; pouch_roll_id: string; status: string }> {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/${encodeURIComponent(orderId)}/approve`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
-  await assertOk(res, "POST /admin/orders/{order_id}/approve");
-  return (await res.json()) as { order_id: string; pouch_roll_id: string; status: string };
+export async function approveOrderForPrinting(
+  orderId: string
+): Promise<{ order_id: string; pouch_roll_id: string; status: string }> {
+  return postJson<{ order_id: string; pouch_roll_id: string; status: string }>(
+    `/admin/orders/${encodeURIComponent(orderId)}/approve`,
+    {},
+    "POST /admin/orders/{order_id}/approve"
+  );
 }
 
 export type AdminOrderSummary = {
@@ -121,34 +106,26 @@ export type OrderStats = {
 };
 
 export async function getAllOrders(): Promise<AdminOrderSummary[]> {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/all`, { cache: "no-store" });
-  await assertOk(res, "GET /admin/orders/all");
-  return (await res.json()) as AdminOrderSummary[];
+  return getJson<AdminOrderSummary[]>("/admin/orders/all", "GET /admin/orders/all");
 }
 
 export async function getOrderStats(): Promise<OrderStats> {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/stats`, { cache: "no-store" });
-  await assertOk(res, "GET /admin/orders/stats");
-  return (await res.json()) as OrderStats;
+  return getJson<OrderStats>("/admin/orders/stats", "GET /admin/orders/stats");
 }
 
 export async function dispatchOrder(orderId: string, trackingId: string) {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/${encodeURIComponent(orderId)}/dispatch`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tracking_id: trackingId }),
-  });
-  await assertOk(res, "POST /admin/orders/{order_id}/dispatch");
-  return await res.json();
+  return postJson<unknown>(
+    `/admin/orders/${encodeURIComponent(orderId)}/dispatch`,
+    { tracking_id: trackingId },
+    "POST /admin/orders/{order_id}/dispatch"
+  );
 }
 
 export async function markDelivered(orderId: string) {
-  const res = await fetch(`${API_BASE_URL}/admin/orders/${encodeURIComponent(orderId)}/deliver`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
-  await assertOk(res, "POST /admin/orders/{order_id}/deliver");
-  return await res.json();
+  return postJson<unknown>(
+    `/admin/orders/${encodeURIComponent(orderId)}/deliver`,
+    {},
+    "POST /admin/orders/{order_id}/deliver"
+  );
 }
 

@@ -1,5 +1,10 @@
+import { getJson } from "./client";
+
 export type PatientRead = {
   id: string;
+  // The backend's PatientRead includes full_name; it was missing here, so the
+  // patient's name was never available to the UI.
+  full_name: string;
   address_line1: string;
   address_line2: string | null;
   city: string;
@@ -9,18 +14,16 @@ export type PatientRead = {
   abha_address: string;
 };
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:8000";
-
 export async function getPatientByAbhaAddress(abhaAddress: string): Promise<PatientRead> {
   const normalized = abhaAddress.trim().toLowerCase();
-  const res = await fetch(`${API_BASE_URL}/patients/${encodeURIComponent(normalized)}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Failed to fetch patient (${res.status}): ${text || res.statusText}`);
-  }
-  return (await res.json()) as PatientRead;
+  return getJson<PatientRead>(
+    `/patients/${encodeURIComponent(normalized)}`,
+    "GET /patients/{abha_address}"
+  );
 }
 
+/** Search patients by name or ABHA address. The backend param is `q`. */
+export async function searchPatients(query?: string): Promise<PatientRead[]> {
+  const qs = query ? `?q=${encodeURIComponent(query)}` : "";
+  return getJson<PatientRead[]>(`/patients/${qs}`, "GET /patients/");
+}
