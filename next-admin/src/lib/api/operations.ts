@@ -61,13 +61,13 @@ export async function getFulfillmentDetails(patientId: string): Promise<Fulfillm
   );
 }
 
-export async function approveForPrinting(patientId: string, windowStart: string, windowEnd: string) {
-  return postJson<{ pouch_roll_id: string; status: string }>(
-    `/fulfillment/${encodeURIComponent(patientId)}/approve-for-printing`,
-    { window_start: windowStart, window_end: windowEnd },
-    "POST /fulfillment/{patient_id}/approve-for-printing"
-  );
-}
+// REMOVED: approveForPrinting(patientId, windowStart, windowEnd)
+//
+// It called a second approve path that created a pouch roll with no order, no
+// stock decrement and no batch allocation, leaving a printed roll with no recall
+// trail. The endpoint has been removed server-side. Approving for printing goes
+// through approveOrderForPrinting(orderId) below, which is order-based and
+// records batch allocations.
 
 export async function getPendingPharmacistOrders(): Promise<PendingPharmacistOrderSummary[]> {
   return getJson<PendingPharmacistOrderSummary[]>(
